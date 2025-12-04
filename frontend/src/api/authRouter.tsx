@@ -1,3 +1,4 @@
+import { useAuth0 } from "@auth0/auth0-react";
 import { useMutation } from "@tanstack/react-query";
 
 const API_BASE_URL =
@@ -9,6 +10,7 @@ interface CreateUserRequest {
 }
 
 export const useCreateMYUser = () => {
+  const { getAccessTokenSilently } = useAuth0();
   const {
     mutateAsync: createUser,
     isPending: isLoading,
@@ -16,9 +18,11 @@ export const useCreateMYUser = () => {
     error,
   } = useMutation({
     mutationFn: async (newUser: CreateUserRequest) => {
+      const accessToken = await getAccessTokenSilently();
       const response = await fetch(`${API_BASE_URL}/api/my/user`, {
         method: "POST",
         headers: {
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(newUser),
@@ -26,7 +30,6 @@ export const useCreateMYUser = () => {
       if (!response.ok) {
         throw new Error("Failed to create user");
       }
-      return response.json();
     },
   });
   return {

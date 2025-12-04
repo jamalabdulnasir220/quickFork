@@ -18,4 +18,29 @@ const createCurrentUser = async (req: Request, res: Response) => {
   }
 };
 
-export { createCurrentUser };
+const updateUser = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req;
+    const { name, addressLine1, country, city } = req.body;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.name = name;
+    user.addressLine1 = addressLine1;
+    user.country = country;
+    user.city = city;
+
+    const updatedUser = await user.save();
+
+    res.status(200).json(updatedUser.toObject());
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export { createCurrentUser, updateUser };
